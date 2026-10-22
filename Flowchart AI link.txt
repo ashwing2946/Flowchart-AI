@@ -1,0 +1,37 @@
+Flowchart AI link
+http://localhost:5173/
+
+
+ACTIVATE UVICORN
+cd C:\Users\DELL\Desktop\Flowchart-AI
+.\.venv\Scripts\Activate.ps1
+uvicorn backend.app.main:app --reload
+
+GPU ID
+ssh ashwin@164.52.193.229
+ashwin@e2e-61-229:~$ cd /home/ashwin/ashwin/Flowchart-AI
+client_loop: send disconnect: Connection reset
+
+API initialisation uvicorn
+python -m uvicorn backend.app.main:app --reload
+
+Tunnel
+ssh -N -L 8001:127.0.0.1:8001 ashwin@164.52.193.229
+
+Front end website
+http://localhost:5173/
+
+Front end
+PS C:\Users\DELL\Desktop\Flowchart-AI> cd frontend   ##to access frontend folder
+npm run dev  ##run the frontend
+
+
+Issues faced
+
+| Problem                 | Why it happened                           | Solution                                                           |
+| ----------------------- | ----------------------------------------- | ------------------------------------------------------------------ |
+| JSON cut off            | Too much output                           | Reduce unnecessary output / increase appropriate generation budget |
+| Pydantic errors         | Schema too rigid                          | Make domain-specific fields optional/flexible                      |
+| Small text unreadable   | Image was downscaled too aggressively     | Increase resolution while controlling image size                   |
+| Timeout                 | Remote inference took longer than allowed | Increase timeout                                                   |
+| Chat could be expensive | Reprocessing image every question         | Reuse structured flowchart context                                 |

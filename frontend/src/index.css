@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-bg: #0a0d11;
+  --color-ink: #e8edf2;
+  --color-muted: #93a0ae;
+  --color-fg: #ffffff;
+  --color-line: rgba(255, 255, 255, 0.1);
+  --color-accent: #34d3c0;
+  --color-ok: #5fd39a;
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Dark (default) values for the non-Tailwind variables */
+:root {
+  --fg-rgb: 255 255 255;
+  --accent-rgb: 52 211 192;
+  --glass-1: rgba(255, 255, 255, 0.11);
+  --glass-2: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-hi: rgba(255, 255, 255, 0.28);
+  --glass-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.7);
+  --rim: rgba(255, 255, 255, 0.6);
+  --btn-1: rgba(52, 211, 192, 0.55);
+  --btn-2: rgba(20, 150, 136, 0.32);
+  --btn-border: rgba(170, 255, 240, 0.38);
+  --orb: conic-gradient(from 180deg, #0f766e, #134e6f, #0a0d11 40%, #14b8a6 70%, #0f766e);
+  --orb-o: 0.5;
+  --amb1: rgba(20, 184, 166, 0.14);
+  --amb2: rgba(40, 110, 170, 0.16);
+}
+
+/* Light: warm cream and brown */
+:root[data-theme="light"] {
+  --color-bg: #f4ecdf;
+  --color-ink: #3a281c;
+  --color-muted: #7b6654;
+  --color-fg: #3a281c;
+  --color-line: rgba(58, 40, 28, 0.14);
+  --color-accent: #8f4f22;
+  --color-ok: #3f7d52;
+  --fg-rgb: 58 40 28;
+  --accent-rgb: 143 79 34;
+  --glass-1: rgba(255, 255, 255, 0.62);
+  --glass-2: rgba(255, 255, 255, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-hi: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 12px 32px -14px rgba(90, 60, 30, 0.4);
+  --rim: rgba(143, 79, 34, 0.55);
+  --btn-1: rgba(143, 79, 34, 0.96);
+  --btn-2: rgba(115, 62, 26, 0.9);
+  --btn-border: rgba(255, 255, 255, 0.5);
+  --orb: conic-gradient(from 180deg, #d9a66b, #c27a4a, #f4ecdf 40%, #e6b98a 70%, #d9a66b);
+  --orb-o: 0.6;
+  --amb1: rgba(214, 160, 100, 0.3);
+  --amb2: rgba(190, 120, 80, 0.2);
+}
+
+html, body, #root { height: 100%; margin: 0; padding: 0; }
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 400ms var(--ease-out-soft), color 400ms var(--ease-out-soft);
+}
+
+/* In the base layer so utilities like outline-none can override it */
+@layer base {
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+}
+
+@keyframes rise   { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes settle { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes dot    { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+@keyframes drift  { from { transform: rotate(0deg) scale(1); } to { transform: rotate(40deg) scale(1.08); } }
+@keyframes sheen  { 0% { left: -50%; opacity: 0; } 25% { opacity: 1; } 100% { left: 120%; opacity: 0; } }
+
+.anim-rise      { animation: rise 300ms var(--ease-out-soft) backwards; }
+.anim-panel     { animation: rise 450ms var(--ease-out-soft) backwards; }
+.anim-msg-user  { animation: rise 220ms var(--ease-out-soft) backwards; }
+.anim-msg-agent { animation: rise 280ms var(--ease-out-soft) backwards; }
+.anim-settle    { animation: settle 400ms var(--ease-out-soft) backwards; }
+.anim-dot       { animation: dot 1.2s ease-in-out infinite; }
+
+.orb {
+  position: absolute; left: 50%; top: -200px; width: 560px; height: 560px; margin-left: -280px;
+  border-radius: 46% 54% 50% 50% / 52% 46% 54% 48%;
+  background: var(--orb); opacity: var(--orb-o);
+  filter: blur(34px); pointer-events: none;
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+  animation: drift 26s ease-in-out infinite alternate;
+}
+
+.expander {
+  display: grid; grid-template-rows: 0fr; opacity: 0;
+  transition: grid-template-rows 350ms var(--ease-out-soft), opacity 250ms var(--ease-out-soft);
+}
+.expander[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
+.expander > div { overflow: hidden; min-height: 0; }
+
+/* ---------- Liquid glass ---------- */
+@layer components {
+  .liquid {
+    position: relative; isolation: isolate; overflow: hidden;
+    background: linear-gradient(135deg, var(--glass-1), var(--glass-2));
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 rgb(var(--fg-rgb) / 0.05), var(--glass-shadow);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    backdrop-filter: blur(20px) saturate(1.6);
+  }
+  /* Cursor effect: a soft light that travels along the glass edge only (no spotlight) */
+  .liquid::before {
+    content: ""; position: absolute; inset: 0; padding: 1px; border-radius: inherit;
+    z-index: -1; pointer-events: none; opacity: 0;
+    background: radial-gradient(130px circle at var(--mx, 50%) var(--my, 50%), var(--rim), transparent 70%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    transition: opacity 300ms var(--ease-out-soft);
+  }
+  .liquid[data-glow]:hover::before { opacity: 1; }
+
+  .glass-soft {
+    background: linear-gradient(135deg, var(--glass-1), var(--glass-2));
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 var(--glass-hi);
+  }
+
+  .liquid-btn {
+    color: #fff;
+    background: linear-gradient(180deg, var(--btn-1), var(--btn-2));
+    border-color: var(--btn-border);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -10px 18px rgba(0,0,0,0.14), 0 10px 28px -10px rgb(var(--accent-rgb) / 0.5);
+    transform: translate(var(--tx, 0px), var(--ty, 0px));
+    transition: transform 180ms var(--ease-out-soft), box-shadow 250ms var(--ease-out-soft), filter 200ms;
+  }
+  .liquid-btn:enabled:hover {
+    transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(1.02);
+    filter: brightness(1.1) saturate(1.1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -10px 18px rgba(0,0,0,0.1), 0 14px 34px -10px rgb(var(--accent-rgb) / 0.7);
+  }
+  .liquid-btn:enabled:active { transform: scale(0.97); transition-duration: 90ms; }
+  .liquid-btn::after {
+    content: ""; position: absolute; top: 0; bottom: 0; left: -50%; width: 40%; opacity: 0; pointer-events: none;
+    transform: skewX(-20deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  }
+  .liquid-btn:enabled:hover::after { animation: sheen 900ms var(--ease-out-soft); }
+}
+
+.ambient {
+  background:
+    radial-gradient(640px 420px at 88% 8%, var(--amb1), transparent 70%),
+    radial-gradient(560px 520px at 72% 95%, var(--amb2), transparent 70%),
+    var(--color-bg);
+}
+
+* { scrollbar-width: thin; scrollbar-color: rgb(var(--fg-rgb) / 0.18) transparent; }
+.scroll-soft { scrollbar-color: transparent transparent; transition: scrollbar-color 300ms; }
+.scroll-soft:hover, .scroll-soft:focus-within { scrollbar-color: rgb(var(--fg-rgb) / 0.22) transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .liquid-btn { transform: none !important; }
+  .liquid-btn::after { display: none; }
+}
